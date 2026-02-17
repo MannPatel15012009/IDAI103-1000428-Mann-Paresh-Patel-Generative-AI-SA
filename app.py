@@ -46,7 +46,17 @@ SPORT_DATA = {
 class CoachBotAI:
     def __init__(self):
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel('gemini')
+        # Try different model names for compatibility
+        try:
+            # Try with full path first
+            self.model = genai.GenerativeModel('models/gemini-1.5-flash')
+        except:
+            try:
+                # Fallback to shorter name
+                self.model = genai.GenerativeModel('gemini-1.5-flash')
+            except:
+                # Ultimate fallback to older model
+                self.model = genai.GenerativeModel('gemini-pro')
     
     def create_personalized_plan(self, user_data):
         """Generate complete personalized plan"""
@@ -269,8 +279,6 @@ def display_sidebar():
         st.title("🏃‍♂️ CoachBot AI")
         st.markdown("---")
         
-
-        
         # Sport Selection
         sport = st.selectbox(
             "Select Your Sport",
@@ -307,6 +315,8 @@ def display_sidebar():
         injury_options = ["None"] + SPORT_DATA[sport]["common_injuries"]
         current_injury = st.selectbox("Current Injury", injury_options)
         
+        injury_duration = None
+        limitations = None
         if current_injury != "None":
             injury_duration = st.selectbox("Injury Duration", 
                                          ["< 2 weeks", "2-4 weeks", "1-3 months", "> 3 months"])
@@ -374,234 +384,165 @@ def display_sidebar():
         competition_level = st.selectbox("Competition Level",
                                        ["Recreational", "School", "Club", "State", "National", "Professional"])
         
-        # Store profile
+        # Store profile in session state
         st.session_state.user_profile = {
             'sport': sport,
             'position': position,
             'age': age,
             'gender': gender,
-            'height': height if height else None,
-            'weight': weight if weight else None,
+            'height': height,
+            'weight': weight,
             'experience': experience,
             'training_days': training_days,
             'fitness_level': fitness_level,
             'goals': goals,
             'current_injury': current_injury,
-            'injury_duration': injury_duration if current_injury != "None" else None,
-            'limitations': limitations if current_injury != "None" else None,
+            'competition_level': competition_level,
             'dietary_restrictions': restrictions,
-            'rare_allergies': rare_allergies if rare_allergies else None,
-            'competition_level': competition_level
+            'rare_allergies': rare_allergies if rare_allergies else None
         }
         
+        # Add injury-specific fields if applicable
+        if current_injury != "None":
+            st.session_state.user_profile['injury_duration'] = injury_duration
+            st.session_state.user_profile['limitations'] = limitations
+        
+        # Generate button
         st.markdown("---")
-    
+        generate_button = st.button("🚀 GENERATE MY PLAN", type="primary", use_container_width=True)
+        
+        return generate_button
 
-def display_sport_info(sport):
-    """Display sport-specific information"""
-    st.header(f"{sport.upper()} Training")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        st.subheader("🏆 Positions")
-        for pos in SPORT_DATA[sport]["positions"]:
-            st.write(f"• {pos}")
-    
-    with col2:
-        st.subheader("⚠️ Common Injuries")
-        for injury in SPORT_DATA[sport]["common_injuries"][:4]:
-            st.write(f"• {injury}")
-    
-    with col3:
-        st.subheader("⚡ Energy Systems")
-        for system, percentage in SPORT_DATA[sport]["energy"].items():
-            st.write(f"{system}: {percentage}%")
-    
+def display_main_content():
+    """Display main content area"""
+    st.title("🏋️‍♂️ CoachBot AI - Your Personal Sports Assistant")
     st.markdown("---")
-
-def display_dietary_summary(user_profile):
-    """Display summary of dietary restrictions"""
-    if user_profile.get('dietary_restrictions'):
-        st.subheader("🚫 Dietary Restrictions")
+    
+    # Check if profile exists
+    if not st.session_state.user_profile:
+        st.info("👈 Please fill in your details in the sidebar and click 'GENERATE MY PLAN' to get started!")
         
-        col1, col2 = st.columns(2)
-        
+        # Display features
+        col1, col2, col3 = st.columns(3)
         with col1:
-            # Show first half of restrictions
-            for restriction in user_profile['dietary_restrictions'][:len(user_profile['dietary_restrictions'])//2]:
-                st.write(f"• {restriction}")
-        
+            st.subheader("📋 Personalized Training")
+            st.write("Get custom workout plans tailored to your sport, position, and goals")
         with col2:
-            # Show second half of restrictions
-            for restriction in user_profile['dietary_restrictions'][len(user_profile['dietary_restrictions'])//2:]:
-                st.write(f"• {restriction}")
+            st.subheader("🥗 Nutrition Guidance")
+            st.write("Receive meal plans that respect your dietary restrictions and preferences")
+        with col3:
+            st.subheader("🧠 Tactical Advice")
+            st.write("Learn position-specific strategies and game intelligence")
         
-        if user_profile.get('rare_allergies'):
-            st.info(f"**Rare Allergies:** {user_profile['rare_allergies']}")
+        return False
+    
+    return True
+
+def display_results(coach):
+    """Display generated results"""
+    user_data = st.session_state.user_profile
+    
+    # Create tabs for different plans
+    tab1, tab2, tab3 = st.tabs(["📋 Training Plan", "🥗 Nutrition Plan", "🧠 Tactical Advice"])
+    
+    with tab1:
+        st.subheader(f"Your Personalized {user_data['sport'].title()} Training Plan")
         
-        st.markdown("---")
+        # Check if plan already exists in session state
+        plan_key = f"training_plan_{user_data['sport']}_{user_data['position']}"
+        
+        if plan_key not in st.session_state.generated_plans:
+            with st.spinner("Creating your personalized training plan..."):
+                try:
+                    plan = coach.create_personalized_plan(user_data)
+                    st.session_state.generated_plans[plan_key] = plan
+                except Exception as e:
+                    st.error(f"Error generating plan: {str(e)}")
+                    return
+        
+        # Display the plan
+        st.markdown(st.session_state.generated_plans[plan_key])
+        
+        # Download button
+        st.download_button(
+            label="📥 Download Training Plan",
+            data=st.session_state.generated_plans[plan_key],
+            file_name=f"training_plan_{user_data['sport']}_{user_data['position']}.txt",
+            mime="text/plain"
+        )
+    
+    with tab2:
+        st.subheader(f"Your Personalized Nutrition Plan")
+        
+        # Check if plan already exists
+        nutrition_key = f"nutrition_plan_{user_data['sport']}_{user_data['position']}"
+        
+        if nutrition_key not in st.session_state.generated_plans:
+            with st.spinner("Creating your personalized nutrition plan..."):
+                try:
+                    plan = coach.generate_nutrition_plan(user_data)
+                    st.session_state.generated_plans[nutrition_key] = plan
+                except Exception as e:
+                    st.error(f"Error generating nutrition plan: {str(e)}")
+                    return
+        
+        # Display the plan
+        st.markdown(st.session_state.generated_plans[nutrition_key])
+        
+        # Download button
+        st.download_button(
+            label="📥 Download Nutrition Plan",
+            data=st.session_state.generated_plans[nutrition_key],
+            file_name=f"nutrition_plan_{user_data['sport']}_{user_data['position']}.txt",
+            mime="text/plain"
+        )
+    
+    with tab3:
+        st.subheader(f"Tactical Advice for {user_data['sport'].title()} {user_data['position']}")
+        
+        # Check if plan already exists
+        tactical_key = f"tactical_advice_{user_data['sport']}_{user_data['position']}"
+        
+        if tactical_key not in st.session_state.generated_plans:
+            with st.spinner("Generating tactical advice..."):
+                try:
+                    advice = coach.generate_tactical_advice(user_data)
+                    st.session_state.generated_plans[tactical_key] = advice
+                except Exception as e:
+                    st.error(f"Error generating tactical advice: {str(e)}")
+                    return
+        
+        # Display the advice
+        st.markdown(st.session_state.generated_plans[tactical_key])
+        
+        # Download button
+        st.download_button(
+            label="📥 Download Tactical Advice",
+            data=st.session_state.generated_plans[tactical_key],
+            file_name=f"tactical_advice_{user_data['sport']}_{user_data['position']}.txt",
+            mime="text/plain"
+        )
 
 def main():
-    """Main application"""
-    st.title("🤖 CoachBot AI - Smart Sports Assistant")
-    st.markdown("Personalized training for **Cricket, Kabaddi & Volleyball** athletes")
+    """Main application function"""
+    # Display sidebar and get generate button state
+    generate_clicked = display_sidebar()
     
-    # Get API key and user inputs
-    display_sidebar()
+    # Display main content
+    profile_exists = display_main_content()
     
-    
-    # Initialize coach
-    coach = CoachBotAI()
-    
-    # Display sport info
-    sport = st.session_state.user_profile['sport']
-    display_sport_info(sport)
-    
-    # Display dietary summary if exists
-    display_dietary_summary(st.session_state.user_profile)
-    
-    # Generate Plans Button
-    if st.button("🚀 Generate Complete Training Package", type="primary", use_container_width=True):
-        
-        # Validate weight input
-        weight = st.session_state.user_profile.get('weight')
-        if weight:
-            try:
-                # Try to convert to float
-                weight_float = float(weight)
-                if weight_float <= 0:
-                    st.error("❌ Please enter a valid weight (positive number)")
-                    return
-            except ValueError:
-                st.error("❌ Please enter a valid weight (numbers only)")
-                return
-        
-        with st.spinner("Creating your personalized plans..."):
-            user_data = st.session_state.user_profile
+    # Initialize coach if needed
+    if profile_exists or generate_clicked:
+        try:
+            coach = CoachBotAI()
             
-            # Create tabs for different plans
-            tab1, tab2, tab3, tab4 = st.tabs([
-                "🏋️ Training Plan", 
-                "🥗 Nutrition Plan", 
-                "🎯 Tactical Advice", 
-                "📊 All Plans"
-            ])
-            
-            with tab1:
-                st.header("Personalized Training Plan")
-                training_plan = coach.create_personalized_plan(user_data)
-                st.write(training_plan)
+            # If generate button was clicked or profile exists, show results
+            if generate_clicked or profile_exists:
+                display_results(coach)
                 
-                # Safety warning for injuries
-                if user_data['current_injury'] != "None":
-                    st.warning("""
-                    ⚠️ **IMPORTANT**: This is an injury-modified plan. 
-                    Always consult with a sports doctor or physiotherapist.
-                    Stop any exercise that causes pain.
-                    """)
-            
-            with tab2:
-                st.header("Personalized Nutrition Plan")
-                nutrition_plan = coach.generate_nutrition_plan(user_data)
-                st.write(nutrition_plan)
-                
-                # Quick nutrition tips
-                st.subheader("💡 Quick Nutrition Tips")
-                
-                tips = {
-                    "cricket": ["Carbs before matches", "Protein after bowling", "Hydrate every over"],
-                    "kabaddi": ["Quick carbs before raid", "Electrolytes during breaks", "Protein after matches"],
-                    "volleyball": ["Carbs before games", "Protein after jumps", "Hydrate every timeout"]
-                }
-                
-                for tip in tips.get(sport, ["Eat balanced meals", "Stay hydrated", "Time your nutrition"]):
-                    st.write(f"• {tip}")
-            
-            with tab3:
-                st.header("Position-Specific Tactical Advice")
-                tactical_advice = coach.generate_tactical_advice(user_data)
-                st.write(tactical_advice)
-            
-            with tab4:
-                st.header("Complete Training Package")
-                
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    st.download_button(
-                        "📥 Download Training Plan",
-                        data=training_plan,
-                        file_name=f"training_plan_{sport}_{datetime.now().strftime('%Y%m%d')}.txt",
-                        mime="text/plain",
-                        use_container_width=True
-                    )
-                
-                with col2:
-                    st.download_button(
-                        "📥 Download Nutrition Plan",
-                        data=nutrition_plan,
-                        file_name=f"nutrition_plan_{sport}_{datetime.now().strftime('%Y%m%d')}.txt",
-                        mime="text/plain",
-                        use_container_width=True
-                    )
-                
-                with col3:
-                    st.download_button(
-                        "📥 Download Tactical Advice",
-                        data=tactical_advice,
-                        file_name=f"tactical_advice_{sport}_{datetime.now().strftime('%Y%m%d')}.txt",
-                        mime="text/plain",
-                        use_container_width=True
-                    )
-                
-                # Feature checklist
-                st.subheader("✅ Features Included")
-                features = [
-                    "Injury-modified training",
-                    "Sport-specific exercises",
-                    "Dietary restriction compliance",
-                    "Position-based tactics",
-                    "4-week training schedule",
-                    "7-day meal plan",
-                    "Recovery protocols",
-                    "Progress tracking",
-                    "Hydration planning",
-                    "Supplement guidance"
-                ]
-                
-                for feature in features:
-                    st.write(f"✓ {feature}")
-        
-        # Success message
-        st.success("✅ Your personalized plans have been generated!")
-        
-        # Prompt engineering showcase
-        with st.expander("🔍 Prompt Engineering Examples"):
-            st.write("""
-            **10+ Prompts Used in This System:**
-            
-            1. **Injury-Specific Training Prompt** - Generates safe workouts for injuries
-            2. **Sport-Specific Nutrition Prompt** - Creates meal plans for each sport
-            3. **Position-Tactics Prompt** - Provides position-specific strategies
-            4. **Recovery Protocol Prompt** - Designs post-injury rehabilitation
-            5. **Hydration Schedule Prompt** - Creates water intake plans
-            6. **Workout Periodization Prompt** - Designs 4-week training cycles
-            7. **Meal Timing Prompt** - Optimizes nutrient timing
-            8. **Supplement Advice Prompt** - Recommends safe supplements
-            9. **Mental Preparation Prompt** - Creates game day routines
-            10. **Progress Tracking Prompt** - Sets measurable goals
-            11. **Alternative Exercise Prompt** - Finds safe exercise alternatives
-            12. **Grocery List Prompt** - Creates shopping lists
-            """)
-    
-    # Footer
-    st.markdown("---")
-    st.markdown("""
-    <div style='text-align: center'>
-        <p>CoachBot AI v2.2 | Powered by Gemini 1.5 Pro | Assessment Submission</p>
-        <p><small>For educational purposes - Consult professionals for medical advice</small></p>
-    </div>
-    """, unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"Error initializing CoachBot AI: {str(e)}")
+            st.info("Please check your API key configuration in Streamlit secrets.")
+
 if __name__ == "__main__":
     main()
