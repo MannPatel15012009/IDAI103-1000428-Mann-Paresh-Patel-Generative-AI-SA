@@ -4,7 +4,7 @@ Final Clean Version with Simplified Dietary Options
 """
 
 import streamlit as st
-import genai
+import google.generativeai as genai
 import pandas as pd
 from datetime import datetime
 
@@ -46,7 +46,7 @@ SPORT_DATA = {
 class CoachBotAI:
     def __init__(self, api_key):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-3-flash-preview')
+        self.model = genai.GenerativeModel('gemini-1.5-flash')
     
     def create_personalized_plan(self, user_data):
         """Generate complete personalized plan"""
