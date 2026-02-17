@@ -44,7 +44,7 @@ SPORT_DATA = {
 }
 
 class CoachBotAI:
-    def __init__(self, api_key):
+    def __init__(self):
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         self.model = genai.GenerativeModel('gemini-1.5-flash')
     
@@ -395,7 +395,7 @@ def display_sidebar():
         }
         
         st.markdown("---")
-        return api_key
+    
 
 def display_sport_info(sport):
     """Display sport-specific information"""
@@ -448,10 +448,8 @@ def main():
     st.markdown("Personalized training for **Cricket, Kabaddi & Volleyball** athletes")
     
     # Get API key and user inputs
-    api_key = display_sidebar()
+    display_sidebar()
     
-    if not api_key:
-        return
     
     # Initialize coach
     coach = CoachBotAI()
