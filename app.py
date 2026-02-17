@@ -152,7 +152,7 @@ class CoachBotAI:
             generation_config={
                 "temperature": 0.2,
                 "top_p": 0.7,
-                "max_output_tokens": 2000
+                "max_output_tokens": 800
             }
         )
         return response.text
