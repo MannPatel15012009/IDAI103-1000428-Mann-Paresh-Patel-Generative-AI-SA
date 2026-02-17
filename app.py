@@ -46,7 +46,7 @@ SPORT_DATA = {
 class CoachBotAI:
     def __init__(self):
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini')
     
     def create_personalized_plan(self, user_data):
         """Generate complete personalized plan"""
