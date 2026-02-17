@@ -45,7 +45,7 @@ SPORT_DATA = {
 
 class CoachBotAI:
     def __init__(self, api_key):
-        genai.configure(api_key=api_key)
+        genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
         self.model = genai.GenerativeModel('gemini-1.5-flash')
     
     def create_personalized_plan(self, user_data):
@@ -269,10 +269,7 @@ def display_sidebar():
         st.title("🏃‍♂️ CoachBot AI")
         st.markdown("---")
         
-        # API Key
-        api_key = st.text_input("Enter Gemini 2.5 Pro API Key", type="password")
-        
-        st.markdown("---")
+
         
         # Sport Selection
         sport = st.selectbox(
@@ -454,12 +451,10 @@ def main():
     api_key = display_sidebar()
     
     if not api_key:
-        st.warning("🔑 Please enter your Gemini API key in the sidebar")
-        st.info("Get API key from: https://aistudio.google.com/app/apikey")
         return
     
     # Initialize coach
-    coach = CoachBotAI(api_key)
+    coach = CoachBotAI()
     
     # Display sport info
     sport = st.session_state.user_profile['sport']
