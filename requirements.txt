@@ -1,1 +1,4 @@
 genai
+streamlit
+pandas
+datetime
