@@ -46,7 +46,7 @@ SPORT_DATA = {
 class CoachBotAI:
     def __init__(self):
         genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
+        self.model = genai.GenerativeModel('gemini-1.5-pro')
     
     def create_personalized_plan(self, user_data):
         """Generate complete personalized plan"""
@@ -599,7 +599,7 @@ def main():
     st.markdown("---")
     st.markdown("""
     <div style='text-align: center'>
-        <p>CoachBot AI v2.2 | Powered by Gemini 1.5 Flash | Assessment Submission</p>
+        <p>CoachBot AI v2.2 | Powered by Gemini 1.5 Pro | Assessment Submission</p>
         <p><small>For educational purposes - Consult professionals for medical advice</small></p>
     </div>
     """, unsafe_allow_html=True)
