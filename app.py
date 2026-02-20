@@ -72,8 +72,8 @@ class CoachBotAI:
             api_key = st.secrets["GEMINI_API_KEY"]
             genai.configure(api_key=api_key)
 
-            # 2. Select Model (Using 1.5 Flash for speed and reliability)
-            self.model_name = "gemini-1.5-flash"
+            # 2. Select Model (Using Gemini 3 Flash Preview for speed and reliability)
+            self.model_name = "gemini-3-flash-preview"
             self.model = genai.GenerativeModel(self.model_name)
             
         except Exception as e:
