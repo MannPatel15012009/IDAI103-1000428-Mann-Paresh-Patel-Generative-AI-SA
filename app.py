@@ -288,7 +288,7 @@ def sidebar_form():
                 'dietary_restrictions': dietary_restrictions, 'rare_allergies': rare_allergies,
                 'intensity': intensity, 'style': style, 'calorie_goal': calorie_goal
             }
-            return True
+        return True
     return False
 
 def main():
