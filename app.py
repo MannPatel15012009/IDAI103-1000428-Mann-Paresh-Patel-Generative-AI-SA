@@ -177,6 +177,54 @@ class CoachBotAI:
         4. **Common Mistakes**: What do players at this level usually do wrong?
         """
         return self.generate_content(prompt, temp=0.5)
+    def generate_warmup_cooldown(self, user_data):
+        """Generate Warm-up and Cooldown Routine"""
+        prompt = f"""
+        Act as an athletic trainer. Generate a personalized warm-up and cooldown routine for a {user_data['sport']} {user_data['position']}.
+        
+        **CONTEXT:**
+        - Current Injury: {user_data['current_injury']}
+        - Training Intensity Preference: {user_data.get('intensity', 'Moderate')}
+        
+        **PROVIDE:**
+        1. A 15-minute dynamic warm-up specific to the movements of a {user_data['position']}.
+        2. A 10-minute cooldown focusing on injury prevention and flexibility.
+        Ensure all exercises are safe considering the athlete's current injury status.
+        """
+        return self.generate_content(prompt, temp=0.3)
+
+    def generate_mental_focus(self, user_data):
+        """Generate Mental Focus and Visualization Strategy"""
+        prompt = f"""
+        Act as a Sports Psychologist. Create a mental focus and pre-match visualization routine for a {user_data['sport']} {user_data['position']}.
+        
+        **CONTEXT:**
+        - Competition Level: {user_data['competition_level']}
+        - Experience: {user_data['experience']} years
+        
+        **PROVIDE:**
+        1. Pre-match visualization techniques specifically for a {user_data['position']}.
+        2. Breathing exercises to manage tournament anxiety.
+        3. Strategies to maintain focus after making a mistake during a game.
+        """
+        return self.generate_content(prompt, temp=0.6)
+
+    def generate_hydration_strategy(self, user_data):
+        """Generate Hydration and Electrolyte Strategy"""
+        prompt = f"""
+        Act as a Sports Nutritionist. Provide a daily hydration and electrolyte strategy for a {user_data['sport']} athlete.
+        
+        **CONTEXT:**
+        - Weight: {user_data['weight']}kg
+        - Training Days: {user_data['training_days']} days/week
+        - Training Style: {user_data.get('style', 'Standard')}
+        
+        **PROVIDE:**
+        1. Daily baseline water intake recommendations.
+        2. Pre-, intra-, and post-training hydration schedule.
+        3. Natural electrolyte replacement suggestions suitable for a youth athlete.
+        """
+        return self.generate_content(prompt, temp=0.4)    
 
 # --- UI Components ---
 
@@ -203,7 +251,10 @@ def sidebar_form():
         level = st.select_slider("Fitness Level", options=["Beginner", "Intermediate", "Advanced", "Elite"], value="Intermediate")
         training_days = st.slider("Training Days/Week", 1, 7, 4)
         comp_level = st.selectbox("Competition Level", ["Recreational", "School/College", "Amateur Club", "Semi-Pro", "Professional"])
-
+        st.markdown("---")
+        st.subheader("⚙️ Training Preferences")
+        intensity = st.select_slider("Training Intensity", options=["Low", "Moderate", "High", "Maximum"])
+        style = st.selectbox("Training Style", ["Endurance Focus", "Explosive Power", "Hypertrophy", "Agility & Speed"])
         # 4. Goals & Health
         goals = st.multiselect("Goals", ["Strength", "Speed", "Stamina", "Muscle Gain", "Fat Loss", "Skill"], default=["Strength", "Skill"])
         
@@ -215,6 +266,7 @@ def sidebar_form():
                 injury_duration = st.selectbox("Duration", ["< 2 weeks", "1 month", "> 3 months"])
         
         with st.expander("🥗 Diet & Allergies", expanded=False):
+            calorie_goal = st.number_input("Daily Calorie Goal (kcal)", min_value=1200, max_value=5000, value=2500, step=100)
             dietary_restrictions = []
             if st.checkbox("Vegetarian"): dietary_restrictions.append("Vegetarian")
             if st.checkbox("Vegan"): dietary_restrictions.append("Vegan")
@@ -227,13 +279,14 @@ def sidebar_form():
         
         if submitted:
             # Save to session state
-            st.session_state.user_profile = {
+          st.session_state.user_profile = {
                 'sport': sport, 'position': position, 'age': age, 'gender': gender,
                 'height': height, 'weight': weight, 'experience': experience,
                 'fitness_level': level, 'training_days': training_days,
                 'competition_level': comp_level, 'goals': goals,
                 'current_injury': current_injury, 'injury_duration': injury_duration,
-                'dietary_restrictions': dietary_restrictions, 'rare_allergies': rare_allergies
+                'dietary_restrictions': dietary_restrictions, 'rare_allergies': rare_allergies,
+                'intensity': intensity, 'style': style, 'calorie_goal': calorie_goal
             }
             return True
     return False
@@ -261,7 +314,10 @@ def main():
     coach = CoachBotAI()
 
     # Create Tabs
-    tab_train, tab_food, tab_tactics = st.tabs(["🏋️ Training", "🥦 Nutrition", "🧠 Tactics"])
+  # Create Tabs
+    tab_train, tab_food, tab_tactics, tab_warmup, tab_mental, tab_hydro, tab_custom = st.tabs([
+        "🏋️ Training", "🥦 Nutrition", "🧠 Tactics", "🧘 Warm-up", "🧘‍♂️ Mental Focus", "💧 Hydration", "💬 Custom Prompt"
+    ])
     
     profile = st.session_state.user_profile
     
@@ -311,11 +367,122 @@ def main():
 
         if tac_id in st.session_state.generated_plans:
             st.markdown(st.session_state.generated_plans[tac_id])
+    # --- Tab 4: Warm-up & Cooldown ---
+    with tab_warmup:
+        warmup_id = f"warmup_{profile['sport']}_{profile['position']}_{profile['current_injury']}"
+        
+        if st.button("Generate Warm-up Routine", key="btn_warmup") or (generate_clicked and warmup_id not in st.session_state.generated_plans):
+            with st.spinner("Designing safe warm-up and cooldown..."):
+                try:
+                    plan = coach.generate_warmup_cooldown(profile)
+                    st.session_state.generated_plans[warmup_id] = plan
+                except Exception as e:
+                    st.error(f"Error generating routine: {e}")
 
+        if warmup_id in st.session_state.generated_plans:
+            st.markdown(st.session_state.generated_plans[warmup_id])
+
+    # --- Tab 5: Mental Focus ---
+    with tab_mental:
+        mental_id = f"mental_{profile['sport']}_{profile['position']}"
+        
+        if st.button("Generate Mental Strategy", key="btn_mental") or (generate_clicked and mental_id not in st.session_state.generated_plans):
+            with st.spinner("Preparing visualization techniques..."):
+                try:
+                    plan = coach.generate_mental_focus(profile)
+                    st.session_state.generated_plans[mental_id] = plan
+                except Exception as e:
+                    st.error(f"Error generating mental strategy: {e}")
+
+        if mental_id in st.session_state.generated_plans:
+            st.markdown(st.session_state.generated_plans[mental_id])
+
+    # --- Tab 6: Hydration ---
+    with tab_hydro:
+        hydro_id = f"hydro_{profile['weight']}_{profile['training_days']}"
+        
+        if st.button("Generate Hydration Plan", key="btn_hydro") or (generate_clicked and hydro_id not in st.session_state.generated_plans):
+            with st.spinner("Calculating fluid requirements..."):
+                try:
+                    plan = coach.generate_hydration_strategy(profile)
+                    st.session_state.generated_plans[hydro_id] = plan
+                except Exception as e:
+                    st.error(f"Error generating hydration plan: {e}")
+
+        if hydro_id in st.session_state.generated_plans:
+            st.markdown(st.session_state.generated_plans[hydro_id])
+    # --- Tab 7: Custom Prompt ---
+    with tab_custom:
+        st.subheader("💬 Ask CoachBot a Custom Question")
+        st.info("Select a sample prompt from the assignment requirements, or write your own! The AI will automatically apply your profile context.")
+        
+        # 15 Sample Prompts covering Training, Rehab, Tactics, and Nutrition
+        sample_prompts = [
+            "✏️ Write my own custom prompt...",
+            "Generate a full-body workout plan focusing on explosive power.",
+            "Create a safe recovery training schedule considering my current injury.",
+            "Provide tactical coaching tips to improve my game awareness.",
+            "Suggest a week-long nutrition guide tailored to my diet type and calorie goal.",
+            "Generate a personalized 15-minute dynamic warm-up routine for my sport.",
+            "Create a post-game cooldown routine focusing on flexibility and injury prevention.",
+            "Design a 3-day agility and speed training schedule.",
+            "What are the most common tactical mistakes made by players in my position?",
+            "Provide a pre-match mental focus and visualization script.",
+            "Give me a daily hydration and electrolyte strategy based on my weight and training days.",
+            "How can I adapt my training safely to avoid worsening my current injury?",
+            "Suggest an ideal pre-workout and post-workout meal plan for heavy training days.",
+            "Create a stamina-building routine for late-game endurance.",
+            "What are the key responsibilities and role mastery tips for my specific position?",
+            "Suggest breathing exercises to manage tournament anxiety and pressure."
+        ]
+        
+        # Dropdown for prompt selection
+        selected_prompt = st.selectbox("Choose a sample prompt to test:", sample_prompts)
+        
+        # Logic to either use the selected prompt or allow custom text input
+        if selected_prompt == "✏️ Write my own custom prompt...":
+            final_prompt = st.text_area(
+                "Enter your custom prompt:", 
+                placeholder="e.g., 'What is a good 5-minute pre-game visualization script?'"
+            )
+        else:
+            final_prompt = selected_prompt
+            # Show the selected prompt in a disabled text area so they can read it fully
+            st.text_area("Selected Prompt:", value=final_prompt, disabled=True)
+        
+        if st.button("Ask CoachBot", key="btn_custom"):
+            if final_prompt and final_prompt != "✏️ Write my own custom prompt...":
+                with st.spinner("CoachBot is thinking..."):
+                    try:
+                        # Combine the user's profile context with their chosen prompt
+                        context_str = f"""
+                        **ATHLETE PROFILE CONTEXT:**
+                        - Sport: {profile['sport']} ({profile['position']})
+                        - Age/Gender: {profile['age']} / {profile['gender']}
+                        - Level: {profile['fitness_level']}
+                        - Experience: {profile['experience']} years
+                        - Injury Status: {profile['current_injury']}
+                        - Diet: {', '.join(profile.get('dietary_restrictions', []))}
+                        
+                        **USER REQUEST:** {final_prompt}
+                        """
+                        
+                        # Send to Gemini
+                        response = coach.generate_content(context_str, temp=0.5)
+                        
+                        # Display the response
+                        st.markdown("### CoachBot's Response:")
+                        st.markdown(response)
+                        
+                    except Exception as e:
+                        st.error(f"Error generating response: {e}")
+            else:
+                st.warning("Please enter or select a prompt first!")        
     # --- Debug Footer ---
     if st.session_state.debug_mode:
         with st.expander("Debug Logs"):
             st.write(st.session_state.error_log)
-
+            
+   
 if __name__ == "__main__":
     main()
