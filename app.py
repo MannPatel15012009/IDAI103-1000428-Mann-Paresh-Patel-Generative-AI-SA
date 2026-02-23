@@ -411,39 +411,39 @@ def main():
 
         if hydro_id in st.session_state.generated_plans:
             st.markdown(st.session_state.generated_plans[hydro_id])
-    # --- Tab 7: Custom Prompt ---
+   # --- Tab 7: Custom Prompt ---
     with tab_custom:
         st.subheader("💬 Ask CoachBot a Custom Question")
-        st.info("Select a sample prompt from the assignment requirements, or write your own! The AI will automatically apply your profile context.")
+        st.info("Select a structured prompt below, or write your own! The AI will adapt to your profile.")
         
-        # 15 Sample Prompts covering Training, Rehab, Tactics, and Nutrition
+        # 15 Sample Prompts structured exactly as Profile + Goal + Context
         sample_prompts = [
             "✏️ Write my own custom prompt...",
-            "Generate a full-body workout plan focusing on explosive power.",
-            "Create a safe recovery training schedule considering my current injury.",
-            "Provide tactical coaching tips to improve my game awareness.",
-            "Suggest a week-long nutrition guide tailored to my diet type and calorie goal.",
-            "Generate a personalized 15-minute dynamic warm-up routine for my sport.",
-            "Create a post-game cooldown routine focusing on flexibility and injury prevention.",
-            "Design a 3-day agility and speed training schedule.",
-            "What are the most common tactical mistakes made by players in my position?",
-            "Provide a pre-match mental focus and visualization script.",
-            "Give me a daily hydration and electrolyte strategy based on my weight and training days.",
-            "How can I adapt my training safely to avoid worsening my current injury?",
-            "Suggest an ideal pre-workout and post-workout meal plan for heavy training days.",
-            "Create a stamina-building routine for late-game endurance.",
-            "What are the key responsibilities and role mastery tips for my specific position?",
-            "Suggest breathing exercises to manage tournament anxiety and pressure."
+            "A 16-year-old male football midfielder preparing for a state tournament needs a high-intensity stamina-building routine and pre-match hydration strategy.",
+            "A 19-year-old female cricket fast bowler recovering from a minor knee strain (< 2 weeks) requires a safe, low-impact lower-body rehab plan.",
+            "An 18-year-old male basketball point guard in the middle of the season needs explosive agility drills and a post-game cooldown routine.",
+            "A 15-year-old female volleyball libero with 2 years of experience wants tactical advice on reading the opponent's attacks and positioning.",
+            "A 20-year-old male kabaddi raider following a vegan diet needs a 7-day high-protein meal plan (2800 kcal) for muscle hypertrophy.",
+            "A 17-year-old female football goalkeeper preparing for a penalty shootout scenario needs breathing exercises and mental focus techniques to handle pressure.",
+            "A 22-year-old male cricket batsman in the off-season wants a 4-week upper body strength training plan to improve hitting power.",
+            "A 16-year-old male volleyball outside hitter with a history of shoulder impingement needs a safe upper-body maintenance and mobility routine.",
+            "A 19-year-old female basketball center needs a vegetarian pre-workout and post-workout nutrition guide to sustain energy during heavy training days.",
+            "An 18-year-old male kabaddi corner defender wants positional decision-making drills and footwork exercises to improve tackle success rates.",
+            "A 15-year-old athlete training 5 days a week in hot weather needs a detailed hydration and natural electrolyte replacement schedule.",
+            "A 21-year-old female football striker needs a weekly sprint interval training plan combined with endurance tracking metrics.",
+            "A 17-year-old male cricket spin bowler needs a daily 15-minute core stability and shoulder flexibility warm-up routine.",
+            "A 20-year-old female basketball power forward returning from an ankle sprain (1 month ago) needs a gradual, safe return-to-play progression plan.",
+            "A 19-year-old male volleyball setter acting as team captain needs tactical communication strategies and match-day leadership advice."
         ]
         
         # Dropdown for prompt selection
-        selected_prompt = st.selectbox("Choose a sample prompt to test:", sample_prompts)
+        selected_prompt = st.selectbox("Choose a structured prompt to test:", sample_prompts)
         
         # Logic to either use the selected prompt or allow custom text input
         if selected_prompt == "✏️ Write my own custom prompt...":
             final_prompt = st.text_area(
                 "Enter your custom prompt:", 
-                placeholder="e.g., 'What is a good 5-minute pre-game visualization script?'"
+                placeholder="e.g., 'A 14-year-old female midfielder preparing for a school tournament needs stamina-building routines...'"
             )
         else:
             final_prompt = selected_prompt
@@ -452,22 +452,19 @@ def main():
         
         if st.button("Ask CoachBot", key="btn_custom"):
             if final_prompt and final_prompt != "✏️ Write my own custom prompt...":
-                with st.spinner("CoachBot is thinking..."):
+                with st.spinner("CoachBot is analyzing the profile and request..."):
                     try:
-                        # Combine the user's profile context with their chosen prompt
+                        # Since the prompt already contains the profile, goal, and context, 
+                        # we just feed it directly to the model. We can still append the 
+                        # app's sidebar data as a strict rule-set so the AI doesn't hallucinate.
                         context_str = f"""
-                        **ATHLETE PROFILE CONTEXT:**
-                        - Sport: {profile['sport']} ({profile['position']})
-                        - Age/Gender: {profile['age']} / {profile['gender']}
-                        - Level: {profile['fitness_level']}
-                        - Experience: {profile['experience']} years
-                        - Injury Status: {profile['current_injury']}
-                        - Diet: {', '.join(profile.get('dietary_restrictions', []))}
+                        **SYSTEM INSTRUCTION:** You are CoachBot AI. Respond to the user's prompt below. 
+                        Ensure your advice aligns with their specific sport, age, injury status, and goals.
                         
-                        **USER REQUEST:** {final_prompt}
+                        **USER PROMPT:** {final_prompt}
                         """
                         
-                        # Send to Gemini
+                        # Send to Gemini (using temp=0.5 for a balance of creativity and accuracy)
                         response = coach.generate_content(context_str, temp=0.5)
                         
                         # Display the response
@@ -477,7 +474,7 @@ def main():
                     except Exception as e:
                         st.error(f"Error generating response: {e}")
             else:
-                st.warning("Please enter or select a prompt first!")        
+                st.warning("Please enter or select a prompt first!")       
     # --- Debug Footer ---
     if st.session_state.debug_mode:
         with st.expander("Debug Logs"):
