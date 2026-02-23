@@ -273,21 +273,54 @@ def sidebar_form():
             if st.checkbox("Gluten-Free"): dietary_restrictions.append("Gluten-Free")
             if st.checkbox("Lactose-Free"): dietary_restrictions.append("Lactose-Free")
             rare_allergies = st.text_input("Specific Allergies (e.g., Peanuts)")
-
+        st.markdown("---")
+        st.subheader("💬 Custom AI Request (Optional)")
+        st.write("Test specific scenarios for your assignment.")
+        
+        # The 15 Sample Prompts
+        sample_prompts = [
+            "✏️ Write my own custom prompt...",
+            "A 16-year-old male football midfielder preparing for a state tournament needs a high-intensity stamina-building routine and pre-match hydration strategy.",
+            "A 19-year-old female cricket fast bowler recovering from a minor knee strain (< 2 weeks) requires a safe, low-impact lower-body rehab plan.",
+            "An 18-year-old male basketball point guard in the middle of the season needs explosive agility drills and a post-game cooldown routine.",
+            "A 15-year-old female volleyball libero with 2 years of experience wants tactical advice on reading the opponent's attacks and positioning.",
+            "A 20-year-old male kabaddi raider following a vegan diet needs a 7-day high-protein meal plan (2800 kcal) for muscle hypertrophy.",
+            "A 17-year-old female football goalkeeper preparing for a penalty shootout scenario needs breathing exercises and mental focus techniques to handle pressure.",
+            "A 22-year-old male cricket batsman in the off-season wants a 4-week upper body strength training plan to improve hitting power.",
+            "A 16-year-old male volleyball outside hitter with a history of shoulder impingement needs a safe upper-body maintenance and mobility routine.",
+            "A 19-year-old female basketball center needs a vegetarian pre-workout and post-workout nutrition guide to sustain energy during heavy training days.",
+            "An 18-year-old male kabaddi corner defender wants positional decision-making drills and footwork exercises to improve tackle success rates.",
+            "A 15-year-old athlete training 5 days a week in hot weather needs a detailed hydration and natural electrolyte replacement schedule.",
+            "A 21-year-old female football striker needs a weekly sprint interval training plan combined with endurance tracking metrics.",
+            "A 17-year-old male cricket spin bowler needs a daily 15-minute core stability and shoulder flexibility warm-up routine.",
+            "A 20-year-old female basketball power forward returning from an ankle sprain (1 month ago) needs a gradual, safe return-to-play progression plan.",
+            "A 19-year-old male volleyball setter acting as team captain needs tactical communication strategies and match-day leadership advice."
+        ]
+        
+        selected_prompt = st.selectbox("Choose a structured prompt:", sample_prompts)
+        
+        if selected_prompt == "✏️ Write my own custom prompt...":
+            final_custom_prompt = st.text_area(
+                "Enter your custom prompt:", 
+                placeholder="e.g., 'A 14-year-old female midfielder...'"
+            )
+        else:
+            final_custom_prompt = selected_prompt
+            st.info(f"**Selected:** {final_custom_prompt}")
         st.markdown("---")
         submitted = st.button("🚀 Generate Plan", type="primary", use_container_width=True)
         
         if submitted:
-            # Save to session state
-          st.session_state.user_profile = {
+           # Save to session state
+            st.session_state.user_profile = {
                 'sport': sport, 'position': position, 'age': age, 'gender': gender,
                 'height': height, 'weight': weight, 'experience': experience,
                 'fitness_level': level, 'training_days': training_days,
                 'competition_level': comp_level, 'goals': goals,
                 'current_injury': current_injury, 'injury_duration': injury_duration,
                 'dietary_restrictions': dietary_restrictions, 'rare_allergies': rare_allergies,
-                'intensity': intensity, 'style': style, 'calorie_goal': calorie_goal
-            }
+                'intensity': intensity, 'style': style, 'calorie_goal': calorie_goal,
+                'custom_prompt': final_custom_prompt 
         return True
     return False
 
@@ -411,70 +444,35 @@ def main():
 
         if hydro_id in st.session_state.generated_plans:
             st.markdown(st.session_state.generated_plans[hydro_id])
-   # --- Tab 7: Custom Prompt ---
+  # --- Tab 7: Custom Prompt ---
     with tab_custom:
-        st.subheader("💬 Ask CoachBot a Custom Question")
-        st.info("Select a structured prompt below, or write your own! The AI will adapt to your profile.")
+        custom_query = profile.get('custom_prompt', "")
         
-        # 15 Sample Prompts structured exactly as Profile + Goal + Context
-        sample_prompts = [
-            "✏️ Write my own custom prompt...",
-            "A 16-year-old male football midfielder preparing for a state tournament needs a high-intensity stamina-building routine and pre-match hydration strategy.",
-            "A 19-year-old female cricket fast bowler recovering from a minor knee strain (< 2 weeks) requires a safe, low-impact lower-body rehab plan.",
-            "An 18-year-old male basketball point guard in the middle of the season needs explosive agility drills and a post-game cooldown routine.",
-            "A 15-year-old female volleyball libero with 2 years of experience wants tactical advice on reading the opponent's attacks and positioning.",
-            "A 20-year-old male kabaddi raider following a vegan diet needs a 7-day high-protein meal plan (2800 kcal) for muscle hypertrophy.",
-            "A 17-year-old female football goalkeeper preparing for a penalty shootout scenario needs breathing exercises and mental focus techniques to handle pressure.",
-            "A 22-year-old male cricket batsman in the off-season wants a 4-week upper body strength training plan to improve hitting power.",
-            "A 16-year-old male volleyball outside hitter with a history of shoulder impingement needs a safe upper-body maintenance and mobility routine.",
-            "A 19-year-old female basketball center needs a vegetarian pre-workout and post-workout nutrition guide to sustain energy during heavy training days.",
-            "An 18-year-old male kabaddi corner defender wants positional decision-making drills and footwork exercises to improve tackle success rates.",
-            "A 15-year-old athlete training 5 days a week in hot weather needs a detailed hydration and natural electrolyte replacement schedule.",
-            "A 21-year-old female football striker needs a weekly sprint interval training plan combined with endurance tracking metrics.",
-            "A 17-year-old male cricket spin bowler needs a daily 15-minute core stability and shoulder flexibility warm-up routine.",
-            "A 20-year-old female basketball power forward returning from an ankle sprain (1 month ago) needs a gradual, safe return-to-play progression plan.",
-            "A 19-year-old male volleyball setter acting as team captain needs tactical communication strategies and match-day leadership advice."
-        ]
+        # Create a unique ID for this specific prompt so we don't re-generate it unnecessarily
+        custom_id = f"custom_{hash(custom_query)}" 
         
-        # Dropdown for prompt selection
-        selected_prompt = st.selectbox("Choose a structured prompt to test:", sample_prompts)
-        
-        # Logic to either use the selected prompt or allow custom text input
-        if selected_prompt == "✏️ Write my own custom prompt...":
-            final_prompt = st.text_area(
-                "Enter your custom prompt:", 
-                placeholder="e.g., 'A 14-year-old female midfielder preparing for a school tournament needs stamina-building routines...'"
-            )
-        else:
-            final_prompt = selected_prompt
-            # Show the selected prompt in a disabled text area so they can read it fully
-            st.text_area("Selected Prompt:", value=final_prompt, disabled=True)
-        
-        if st.button("Ask CoachBot", key="btn_custom"):
-            if final_prompt and final_prompt != "✏️ Write my own custom prompt...":
-                with st.spinner("CoachBot is analyzing the profile and request..."):
+        if custom_query and custom_query != "✏️ Write my own custom prompt...":
+            if st.button("Generate Custom Response", key="btn_custom") or (generate_clicked and custom_id not in st.session_state.generated_plans):
+                with st.spinner("Analyzing custom request..."):
                     try:
-                        # Since the prompt already contains the profile, goal, and context, 
-                        # we just feed it directly to the model. We can still append the 
-                        # app's sidebar data as a strict rule-set so the AI doesn't hallucinate.
                         context_str = f"""
                         **SYSTEM INSTRUCTION:** You are CoachBot AI. Respond to the user's prompt below. 
                         Ensure your advice aligns with their specific sport, age, injury status, and goals.
                         
-                        **USER PROMPT:** {final_prompt}
+                        **USER PROMPT:** {custom_query}
                         """
-                        
-                        # Send to Gemini (using temp=0.5 for a balance of creativity and accuracy)
-                        response = coach.generate_content(context_str, temp=0.5)
-                        
-                        # Display the response
-                        st.markdown("### CoachBot's Response:")
-                        st.markdown(response)
-                        
+                        # Generate the response
+                        plan = coach.generate_content(context_str, temp=0.5)
+                        st.session_state.generated_plans[custom_id] = plan
                     except Exception as e:
                         st.error(f"Error generating response: {e}")
-            else:
-                st.warning("Please enter or select a prompt first!")       
+
+            if custom_id in st.session_state.generated_plans:
+                st.markdown("### 💬 CoachBot's Custom Response")
+                st.success(f"**Your Prompt:** {custom_query}")
+                st.markdown(st.session_state.generated_plans[custom_id])
+        else:
+            st.info("👈 Please enter or select a custom prompt in the sidebar, then click 'Generate Plan' to see the response here.")     
     # --- Debug Footer ---
     if st.session_state.debug_mode:
         with st.expander("Debug Logs"):
