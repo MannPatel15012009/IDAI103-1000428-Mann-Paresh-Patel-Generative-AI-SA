@@ -143,6 +143,7 @@ class CoachBotAI:
             restrictions.append(f"ALLERGY: {user_data['rare_allergies']}")
         
         diet_str = ", ".join(restrictions) if restrictions else "None"
+        calorie_goal = user_data.get('calorie_goal', 'Calculate based on stats')
 
         prompt = f"""
         Act as a Sports Nutritionist. Create a 7-day meal plan.
@@ -151,16 +152,16 @@ class CoachBotAI:
         - Sport: {user_data['sport']}
         - Stats: {user_data['height']}cm, {user_data['weight']}kg, {user_data['gender']}
         - Goals: {', '.join(user_data['goals'])}
-        - Dietary Restrictions: {diet_str}
+        - Dietary Restrictions & Allergies: {diet_str}
+        - Target Daily Calories: {calorie_goal} kcal
         
         **REQUIREMENTS:**
-        1. Calculate approximate daily Calorie and Macro targets based on stats.
-        2. Provide a 7-day plan (Breakfast, Lunch, Dinner, Snacks).
+        1. Base the meal plan on the target daily calories ({calorie_goal} kcal) and calculate appropriate Macro targets.
+        2. Provide a 7-day plan (Breakfast, Lunch, Dinner, Snacks) strictly adhering to the dietary restrictions: {diet_str}.
         3. Specifically mention Pre-workout and Post-workout nutrition timing.
         4. Include a shopping list for the week.
         """
         return self.generate_content(prompt, temp=0.4)
-
     def generate_tactical_advice(self, user_data):
         """Generate Tactical Advice"""
         prompt = f"""
@@ -373,9 +374,14 @@ def main():
             st.markdown(st.session_state.generated_plans[plan_id])
             st.download_button("📥 Download Plan", st.session_state.generated_plans[plan_id], file_name="training_plan.md")
 
-    # --- Tab 2: Nutrition ---
+   # --- Tab 2: Nutrition ---
     with tab_food:
-        nutri_id = f"nutri_{profile['sport']}_{profile['weight']}"
+        # Create a string representation of the diets and allergies to make the cache ID unique
+        diet_str = "_".join(profile.get('dietary_restrictions', []))
+        allergy_str = profile.get('rare_allergies', '').replace(" ", "_")
+        
+        # Update the ID to include diets, allergies, and calorie goal
+        nutri_id = f"nutri_{profile['sport']}_{profile['weight']}_{diet_str}_{allergy_str}_{profile.get('calorie_goal', '')}"
         
         if st.button("Generate Nutrition Plan", key="btn_nutri") or (generate_clicked and nutri_id not in st.session_state.generated_plans):
             with st.spinner("Calculating macros and meal planning..."):
