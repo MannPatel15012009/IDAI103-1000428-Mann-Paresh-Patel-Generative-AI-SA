@@ -279,7 +279,8 @@ def sidebar_form():
         st.write("Test specific scenarios for your assignment.")
         
         # The 15 Sample Prompts
-       sample_prompts = [
+       sample_prompts = 
+       [
             "✏️ Write my own custom prompt...",
             "Design a 4-week explosive power program for a Basketball Power Forward entering the pre-season.",
             "Create a 3-week agility and speed routine for a Football Midfielder focusing on quick directional changes.",
