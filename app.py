@@ -280,8 +280,7 @@ def sidebar_form():
         
         # The 15 Sample Prompts
        sample_prompts = 
-       [
-            "✏️ Write my own custom prompt...",
+        [   "✏️ Write my own custom prompt...",
             "Design a 4-week explosive power program for a Basketball Power Forward entering the pre-season.",
             "Create a 3-week agility and speed routine for a Football Midfielder focusing on quick directional changes.",
             "Suggest a modified Volleyball workout that avoids aggravating a rotator cuff injury while maintaining cardiovascular endurance.",
