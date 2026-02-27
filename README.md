@@ -1,4 +1,4 @@
-# CoachBot AI  
+# NextGen Sports Lab
 ### Generative AI Powered Smart Sports Performance Assistant  
 > By *Mann Paresh Patel*  
 
@@ -6,11 +6,11 @@
 
 ## Project Overview  
 
-CoachBot AI is an advanced AI-powered sports performance advisory system developed using **Streamlit** and **Gemini**.  
+NextGen Sports Lab is an advanced AI-powered sports performance advisory system developed using **Streamlit** and **Gemini**.  
 
 The application is designed to provide structured, sport-specific, and position-aware performance guidance for athletes across multiple disciplines. By collecting detailed athlete inputs and applying contextual prompt engineering techniques, the system generates comprehensive training programs, nutrition strategies, and tactical intelligence tailored to the athlete’s profile.
 
-Unlike generic fitness applications, CoachBot AI integrates sport context, competition level, injury condition, and performance goals into its decision-making process. The system dynamically adapts its recommendations based on whether the athlete is healthy or currently recovering from an injury.
+Unlike generic fitness applications, NextGen Sports Lab integrates sport context, competition level, injury condition, and performance goals into its decision-making process. The system dynamically adapts its recommendations based on whether the athlete is healthy or currently recovering from an injury.
 
 The platform is structured into three core AI modules:
 
@@ -50,7 +50,7 @@ All outputs are structured in professional Markdown format for clarity and reada
 
 ### 🚑 Injury-Adaptive Training Logic  
 
-CoachBot AI incorporates conditional branch logic for injury handling.
+NextGen Sports Lab incorporates conditional branch logic for injury handling.
 
 If an athlete selects an active injury:
 
@@ -115,7 +115,7 @@ Each sport includes predefined position lists and common injury references, enab
 
 ### 🔄 Session-Based Plan Management  
 
-CoachBot AI utilizes Streamlit’s session state management to:
+NextGen Sports Lab utilizes Streamlit’s session state management to:
 
 - Store generated plans  
 - Prevent unnecessary regeneration  
@@ -226,7 +226,7 @@ streamlit run app.py
 
 ## Prompt Engineering Strategy  
 
-CoachBot AI uses structured role-based prompt engineering.
+NextGen Sports Lab uses structured role-based prompt engineering.
 
 Each module assigns a professional persona:
 - Elite Sports Performance Coach  
