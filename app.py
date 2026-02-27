@@ -279,23 +279,23 @@ def sidebar_form():
         st.write("Test specific scenarios for your assignment.")
         
         # The 15 Sample Prompts
-        sample_prompts = [
+       sample_prompts = [
             "✏️ Write my own custom prompt...",
-            "A 16-year-old male football midfielder preparing for a state tournament needs a high-intensity stamina-building routine and pre-match hydration strategy.",
-            "A 19-year-old female cricket fast bowler recovering from a minor knee strain (< 2 weeks) requires a safe, low-impact lower-body rehab plan.",
-            "An 18-year-old male basketball point guard in the middle of the season needs explosive agility drills and a post-game cooldown routine.",
-            "A 15-year-old female volleyball libero with 2 years of experience wants tactical advice on reading the opponent's attacks and positioning.",
-            "A 20-year-old male kabaddi raider following a vegan diet needs a 7-day high-protein meal plan (2800 kcal) for muscle hypertrophy.",
-            "A 17-year-old female football goalkeeper preparing for a penalty shootout scenario needs breathing exercises and mental focus techniques to handle pressure.",
-            "A 22-year-old male cricket batsman in the off-season wants a 4-week upper body strength training plan to improve hitting power.",
-            "A 16-year-old male volleyball outside hitter with a history of shoulder impingement needs a safe upper-body maintenance and mobility routine.",
-            "A 19-year-old female basketball center needs a vegetarian pre-workout and post-workout nutrition guide to sustain energy during heavy training days.",
-            "An 18-year-old male kabaddi corner defender wants positional decision-making drills and footwork exercises to improve tackle success rates.",
-            "A 15-year-old athlete training 5 days a week in hot weather needs a detailed hydration and natural electrolyte replacement schedule.",
-            "A 21-year-old female football striker needs a weekly sprint interval training plan combined with endurance tracking metrics.",
-            "A 17-year-old male cricket spin bowler needs a daily 15-minute core stability and shoulder flexibility warm-up routine.",
-            "A 20-year-old female basketball power forward returning from an ankle sprain (1 month ago) needs a gradual, safe return-to-play progression plan.",
-            "A 19-year-old male volleyball setter acting as team captain needs tactical communication strategies and match-day leadership advice."
+            "Design a 4-week explosive power program for a Basketball Power Forward entering the pre-season.",
+            "Create a 3-week agility and speed routine for a Football Midfielder focusing on quick directional changes.",
+            "Suggest a modified Volleyball workout that avoids aggravating a rotator cuff injury while maintaining cardiovascular endurance.",
+            "Outline a safe return-to-play progression for a Kabaddi Raider recovering from a mild ankle sprain.",
+            "Provide a pre-match routine focusing on anxiety management for a Football Goalkeeper facing a high-pressure tournament.",
+            "Recommend visualization techniques and focus strategies for a Cricket Batsman struggling with early-innings nerves.",
+            "Outline a game-day hydration strategy for a Cricket Fast Bowler playing in hot and humid conditions.",
+            "Suggest a tournament-day nutrition timeline for a Volleyball Middle Blocker playing three matches in one weekend.",
+            "What are the best drills to improve reaction time for a Kabaddi Corner Defender with beginner-level experience?",
+            "Break down advanced spatial awareness and off-ball movement tactics for a Basketball Point Guard.",
+            "Create a 3000 kcal daily meal plan for a Football Defender strictly following a vegan diet.",
+            "Develop a high-protein, gluten-free meal plan for a Volleyball Setter aiming to build muscle mass.",
+            "Generate a 15-minute dynamic warm-up routine focusing on hip mobility and hamstring activation for a Football Striker.",
+            "Design a 10-minute post-match cooldown routine focusing on shoulder flexibility and recovery for a Cricket Spin Bowler.",
+            "Combine a high-intensity stamina workout with a post-workout recovery meal plan for a Basketball Shooting Guard."
         ]
         
         selected_prompt = st.selectbox("Choose a structured prompt:", sample_prompts)
