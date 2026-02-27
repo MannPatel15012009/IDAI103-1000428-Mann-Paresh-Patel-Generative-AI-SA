@@ -279,7 +279,7 @@ def sidebar_form():
         st.write("Test specific scenarios for your assignment.")
         
         # The 15 Sample Prompts
-       sample_prompts = [
+        sample_prompts= [
             "✏️ Write my own custom prompt...",
             "Design a 4-week explosive power program for a Basketball Power Forward entering the pre-season.",
             "Create a 3-week agility and speed routine for a Football Midfielder focusing on quick directional changes.",
@@ -296,7 +296,7 @@ def sidebar_form():
             "Generate a 15-minute dynamic warm-up routine focusing on hip mobility and hamstring activation for a Football Striker.",
             "Design a 10-minute post-match cooldown routine focusing on shoulder flexibility and recovery for a Cricket Spin Bowler.",
             "Combine a high-intensity stamina workout with a post-workout recovery meal plan for a Basketball Shooting Guard."
-       ] 
+        ] 
         
         selected_prompt = st.selectbox("Choose a structured prompt:", sample_prompts)
         
