@@ -5,7 +5,7 @@ from datetime import datetime
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="CoachBot AI - Smart Sports Assistant",
+    page_title="NextGen Sports Lab - Smart Sports Assistant",
     page_icon="🏃‍♂️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -60,7 +60,7 @@ def log_error(context, error):
     print(f"[{timestamp}] ERROR in {context}: {error_msg}")
 
 # --- AI Core Class ---
-class CoachBotAI:
+class NextGen_Sports_Lab:
     def __init__(self):
         """Initialize and Authenticate Gemini AI"""
         try:
@@ -328,7 +328,7 @@ def sidebar_form():
     return False
 
 def main():
-    st.title("🏃‍♂️ CoachBot AI")
+    st.title("🏃‍♂️ NextGen Sports Lab")
     st.caption(f"Powered by Google Gemini 1.5 Flash • {datetime.now().strftime('%Y')}")
 
     # Render Sidebar
@@ -338,7 +338,7 @@ def main():
     if not st.session_state.user_profile:
         st.info("👈 Please fill out your profile in the sidebar to get started.")
         st.markdown("""
-        ### What can CoachBot do?
+        ### What can NextGen Sports Lab do?
         * **🏋️ Training:** Periodized workout plans specific to your sport.
         * **🚑 Rehab:** Modified plans if you are currently injured.
         * **🥦 Nutrition:** Meal plans tailored to your body type and preferences.
@@ -347,7 +347,7 @@ def main():
         return
 
     # Initialize AI
-    coach = CoachBotAI()
+    coach = NextGen_Sports_Lab()
 
     # Create Tabs
   # Create Tabs
@@ -464,7 +464,7 @@ def main():
                 with st.spinner("Analyzing custom request..."):
                     try:
                         context_str = f"""
-                        **SYSTEM INSTRUCTION:** You are CoachBot AI. Respond to the user's prompt below. 
+                        **SYSTEM INSTRUCTION:** You are NextGen Sports Lab. Respond to the user's prompt below. 
                         Ensure your advice aligns with their specific sport, age, injury status, and goals.
                         
                         **USER PROMPT:** {custom_query}
@@ -476,7 +476,7 @@ def main():
                         st.error(f"Error generating response: {e}")
 
             if custom_id in st.session_state.generated_plans:
-                st.markdown("### 💬 CoachBot's Custom Response")
+                st.markdown("### 💬 NextGen Sports Lab's Custom Response")
                 st.success(f"**Your Prompt:** {custom_query}")
                 st.markdown(st.session_state.generated_plans[custom_id])
         else:
